@@ -1,16 +1,80 @@
+# Dataset
+The data used for this project comes from [UniTime](https://www.unitime.org/exam_datasets.php), an open-source application dedicated to generating exam schedules. The dataset selected for this work, _`pu-exam-fal12`_, is an XML file containing information about a week of exams at Purdue University during the fall of 2012. 
+
+To  understand correctly  the data, this XML file will be convert into multiple CSV files.
+- Parameters
+- Periods
+- Rooms
+- Exams
+- Students
+- Instructors
+- Constraints
+
+
+
 ```python
 import xml.etree.ElementTree as ET
 import csv
-```
-
-
-```python
 def retrieve_xml_root(xml_file):
     return ET.parse(xml_file).getroot()
 ```
 
-# Converts xml Periods into csv file
+# Parameters
+Essential constants used inside the program
 
+| Property Name                                | Value       |
+|---------------------------------------------|-------------|
+| backToBackConflictWeight                    | 10.0        |
+| backToBackDistance                          | -1.0        |
+| directConflictWeight                        | 1000.0      |
+| distanceBackToBackConflictWeight            | 25.0        |
+| distanceToStronglyPreferredRoomWeight       | 1.0E-4      |
+| distributionWeight                          | 1.0         |
+| examRotationWeight                          | 1.0E-4      |
+| instructorBackToBackConflictWeight          | 0.0         |
+| instructorDirectConflictWeight              | 10.0        |
+| instructorDistanceBackToBackConflictWeight  | 0.0         |
+| instructorMoreThanTwoADayWeight             | 0.0         |
+| isDayBreakBackToBack                        | false       |
+| largePeriod                                 | 0.86        |
+| largeSize                                   | 600         |
+| largeWeight                                 | 2500000.0   |
+| maxRooms                                    | 4           |
+| moreThanTwoADayWeight                       | 100.0       |
+| mpp                                         | false       |
+| periodIndexWeight                           | 1.0E-7      |
+| periodSizeWeight                            | 0.5         |
+| periodWeight                                | 1.0         |
+| perturbationWeight                          | 0.0010      |
+| roomPerturbationWeight                      | 0.1         |
+| roomSizeFactor                              | 1.1         |
+| roomSizeWeight                              | 0.0010      |
+| roomSplitDistanceWeight                     | 0.01        |
+| roomSplitWeight                             | 10.0        |
+| roomWeight                                  | 1.0         |
+
+
+
+```python
+xml_file = "./raw_data/parameters.xml"  
+csv_file = "./csv_data/parameters.csv"  
+
+root = retrieve_xml_root(xml_file)
+with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+
+    # Write the CSV header
+    writer.writerow(['Property Name', 'Value'])
+
+    # Iterate over each property in the XML
+    for property in root.findall('property'):
+        name = property.get('name')
+        value = property.get('value')
+        writer.writerow([name, value])
+
+```
+
+# Periods
  ```XML
 <periods>
     <period id="1" length="120" day="07/12/10" time="8:00am-10:00am" penalty="0"/>
@@ -28,14 +92,12 @@ def retrieve_xml_root(xml_file):
 - **length**	period length (in minutes)
 - **day**	period date (string)
 - **time**	period time (string)
-- **penalty**	penalization of using this period
-
-Unless changed on an exam, if an exam is assigned to a period with non-zero penalty, this penalty is added to the overall period penalty of the solution
+- **penalty**	penalization of using this period unless changed on an exam, if an exam is assigned to a period with non-zero penalty, this penalty is added to the overall period penalty of the solution
 
 
 ```python
 xml_file = "./raw_data/periods.xml"  
-csv_file = "./csv_data/periods.csv"  # Replace with your desired output CSV file path 
+csv_file = "./csv_data/periods.csv"  
 root = retrieve_xml_root(xml_file)
 with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
@@ -48,17 +110,13 @@ with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
         period_id = period.get('id', 'N/A')
         length = period.get('length', 'N/A')
         day = period.get('day', 'N/A')
-        time = period.get('time', 'N/A')
+        time = period.get('time', 'N/A').replace('a',"AM").replace('p',"PM")
         penalty = period.get('penalty', '0')  # Default penalty is 0
         writer.writerow([period_id, length, day, time, penalty])
 
-print(f"Data successfully converted to '{csv_file}'.")
 ```
 
-    Data successfully converted to './csv_data/periods.csv'.
-    
-
-# Converts xml data rooms into csv file
+# Rooms
 
  ```XML
 <rooms>
@@ -89,7 +147,7 @@ Room can be unavailable for certain periods. Unless changed on an exam, if an ex
 
 ```python
 xml_file = "./raw_data/rooms.xml"  
-csv_file = "./csv_data/rooms.csv"  # Replace with your desired output CSV file path 
+csv_file = "./csv_data/rooms.csv"  
 root = retrieve_xml_root(xml_file)
 with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
    writer = csv.writer(file)
@@ -106,44 +164,49 @@ with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
 
       # Process periods associated with the room
       periods = room.findall('period')
+      tmp=[]
       if periods:
+  
          for period in periods:
-            period_id = period.get('id', 'N/A')
-            available = period.get('available', 'true')  # Default is true
-            penalty = period.get('penalty', '0')  # Default is 0
-            writer.writerow([room_id, size, alt_size, coordinates, period_id, available, penalty])
-      else:
+            period_id = int(period.get('id', 'N/A'))
+            tmp.append(period_id)
+            available = period.get('available', True)  # Default is true
+            penalty = period.get('penalty', 0)  # Default is 0
+            writer.writerow([int(room_id), int(size), int(alt_size), coordinates, int(period_id), available, int(penalty)])
          # Write room info if no periods are defined
-         writer.writerow([room_id, size, alt_size, coordinates, "N/A", "true", "0"])
-
-# Input XML file and output CSV file paths
-
-
-print(f"CSV file '{csv_file}' has been created successfully.")
+      for i in range(29):
+          if i+1 in tmp :
+              continue
+          writer.writerow([int(room_id), int(size), int(alt_size), coordinates, i+1, True, 0])
 ```
 
-    CSV file './csv_data/rooms.csv' has been created successfully.
-    
-
-# Converts xml data exams into csv file
+# Exams
 
  ```XML
 <exams>
+    <!--Begin object Exam-->
     <exam id="1" length="120" alt="true" minSize="10" maxRooms="2" average="14">
+        <!--Begin listing the periods during the exam can be scheduled -->
         <period id="1"/>
         <period id="3" penalty="2"/>
         <period id="4" penalty="-2"/>
         ...
+        <!--End listing periods-->
+        <!--Begin listing of avaiable rooms for the exam -->
         <room id="1"/>
         <room id="5" penalty="2"/>
         <room id="12" penalty="-1"/>
         ...
+        <!--End listing rooms-->
+         <!--This object appear only when a solution is found-->
         <assignment>
             <period id="1"/>
             <room id="5"/>
             <room id="12"/>
         </assignment>
+        <!--End assignement-->
     </exam>
+    <!--End object Exam-->
     <exam id="2" length="60" alt="false">
         <period id="2"/>
         <period id="4" penalty="2"/>
@@ -188,7 +251,7 @@ List of available periods and rooms is included in the exam element. If an exam 
 
 ```python
 xml_file = "./raw_data/exams.xml"  
-csv_file = "./csv_data/exams.csv"  # Replace with your desired output CSV file path 
+csv_file = "./csv_data/exams.csv"  
 csv_headers = [
     "ExamID", "Length", "AltSeating", "MinSize", "MaxRooms", "Average",
     "PeriodID", "PeriodPenalty", "RoomID", "RoomPenalty", "AssignedPeriod", "AssignedRooms"
@@ -223,7 +286,7 @@ with open(csv_file, mode="w", newline="", encoding="utf-8") as file:
                 assigned_rooms = ""
                 if assignment is not None:
                     assigned_period = assignment.find("period").get("id", "") if assignment.find("period") is not None else ""
-                    assigned_rooms = ", ".join([r.get("id") for r in assignment.findall("room")])
+                    assigned_rooms = ",".join([r.get("id") for r in assignment.findall("room")])
 
                 # Write data to the CSV file
                 writer.writerow([
@@ -231,15 +294,10 @@ with open(csv_file, mode="w", newline="", encoding="utf-8") as file:
                     period_id, period_penalty, room_id, room_penalty, assigned_period, assigned_rooms
                 ])
 
-print(f"Data successfully written to {csv_file}")
 ```
 
-    Data successfully written to ./csv_data/exams.csv
-    
-
-# Converts xml data students into csv file
+# Students
  ```XML
-
 <students>
     <student id="1">
         <exam id="2048"/>
@@ -261,7 +319,7 @@ A student might be not available at some periods (direct conflict occurs when an
 
 ```python
 xml_file = "./raw_data/students.xml"  
-csv_file = "./csv_data/students.csv"  # Replace with your desired output CSV file path 
+csv_file = "./csv_data/students.csv"  
 
 root = retrieve_xml_root(xml_file)
 with open(csv_file, 'w', newline='', encoding='utf-8') as file:
@@ -273,19 +331,34 @@ with open(csv_file, 'w', newline='', encoding='utf-8') as file:
     # Parse and write data
     for student in root.findall('student'):
         student_id = student.get('id')
-        exams = [exam.get('id') for exam in student.findall('exam')]
-        writer.writerow([student_id, ', '.join(exams)])
+        for exam in student.findall('exam'):
+            writer.writerow([student_id, int(exam.get('id'))])
 
-print(f"Data successfully converted and saved to {csv_file}")
 ```
 
-    Data successfully converted and saved to ./csv_data/students.csv
-    
+# Instructors
+```XML
+<instructors>
+    <instructor id="1">
+        <exam id="123"/>
+        <exam id="235"/>
+        <exam id="1235"/>
+    </instructor>
+    <instructor id="2">
+        <exam id="389"/>
+        <exam id="1234"/>
+        <period id="7" available="false"/>
+    </instructor>
+    ... 
+</instructors> 
+```
+Each instructor has a unique id and a list of examinations into which he/she is enrolled.
+An instructor might be not available at some periods (direct conflict occurs when an exam with such a student is placed into such a period) 
 
 
 ```python
 xml_file = "./raw_data/instructors.xml"  
-csv_file = "./csv_data/instructors.csv"  # Replace with your desired output CSV file path 
+csv_file = "./csv_data/instructors.csv"  
 
 root = retrieve_xml_root(xml_file)
 with open(csv_file, 'w', newline='', encoding='utf-8') as file:
@@ -301,15 +374,11 @@ with open(csv_file, 'w', newline='', encoding='utf-8') as file:
         unavailable_periods = [
             period.get('id') for period in instructor.findall('period') if period.get('available') == 'false'
         ]
-        writer.writerow([instructor_id, ', '.join(exams), ', '.join(unavailable_periods)])
+        writer.writerow([instructor_id, ', '.join(exams), ','.join(unavailable_periods)])
 
-print(f"Data successfully converted and saved to {csv_file}")
 ```
 
-    Data successfully converted and saved to ./csv_data/instructors.csv
-    
-
-# Converts xml data constraint into csv file
+# Constraints
  ```XML
 <constraints>
     <different-period id="1">
@@ -337,7 +406,7 @@ Following constraints are defined:
 
 ```python
 xml_file = "./raw_data/constraints.xml"  
-csv_file = "./csv_data/constraints.csv"  # Replace with your desired output CSV file path 
+csv_file = "./csv_data/constraints.csv"  
 
 root = retrieve_xml_root(xml_file)
 csv_headers = ['Constraint Type', 'Constraint ID', 'Hard', 'Weight', 'Exam IDs']
@@ -358,43 +427,7 @@ with open(csv_file, 'w', newline='', encoding='utf-8') as file:
         exam_ids = [exam.get('id') for exam in constraint.findall('exam')]
 
         # Write the row to the CSV file
-        writer.writerow([constraint_type, constraint_id, hard, weight, ', '.join(exam_ids)])
-
-print(f"Data successfully written to {csv_file}")
-```
-
-    Data successfully written to ./csv_data/constraints.csv
-    
-
-# Converts xml data parameters into csv file
-
-
-
-```python
-xml_file = "./raw_data/parameters.xml"  
-csv_file = "./csv_data/parameters.csv"  # Replace with your desired output CSV file path 
-
-root = retrieve_xml_root(xml_file)
-with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-
-    # Write the CSV header
-    writer.writerow(['Property Name', 'Value'])
-
-    # Iterate over each property in the XML
-    for property in root.findall('property'):
-        name = property.get('name')
-        value = property.get('value')
-        writer.writerow([name, value])
-
-print(f"Data successfully converted and saved to '{csv_file}'")
-```
-
-    Data successfully converted and saved to './csv_data/parameters.csv'
-    
-
-
-```python
+        writer.writerow([constraint_type, constraint_id, hard, weight, ','.join(exam_ids)])
 
 ```
 
