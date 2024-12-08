@@ -51,4 +51,4 @@ While hard constraints ensure feasibility, soft constraints focus on optimizing 
 ---
 
 ### Data Overview
-This [link](./data_convertion.md) offers a comprehensive overview of the dataset, detailing its structure, properties, and attributes. The second [link](./csv_overview.md) focuses on the dataset after its conversion into CSV format.
+This [link](./data_convertion.md) give an overview of the dataset, detailing its structure, properties, and attributes. The second [link](./csv_overview.md) focuses on the dataset after its conversion into CSV format.

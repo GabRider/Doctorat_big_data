@@ -1,12 +1,12 @@
 # dataset link
 
-For hourly data on single levels from 1979 to present: [ERA5 hourly data on single levels](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form)
-For hourly data on pressure levels from 1979 to present: [ERA5 hourly data on pressure levels](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=form)
+- For hourly data on single levels from 1979 to present: [ERA5 hourly data on single levels](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form)
+- For hourly data on pressure levels from 1979 to present: [ERA5 hourly data on pressure levels](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=form)
 # other links
-[Paper Graphcast](https://www.science.org/doi/epdf/10.1126/science.adi2336)
-[ECMWF Forecast model](https://confluence.ecmwf.int/display/FUG/Section+5.3.1+M-climate,+the+ENS+Model+Climate)
-[CDSAPI python credential](https://cds.climate.copernicus.eu/how-to-api)
-[ERA5 request creator](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download#manage-licences)
+- [Paper Graphcast](https://www.science.org/doi/epdf/10.1126/science.adi2336)
+- [ECMWF Forecast model](https://confluence.ecmwf.int/display/FUG/Section+5.3.1+M-climate,+the+ENS+Model+Climate)
+- [CDSAPI python credential](https://cds.climate.copernicus.eu/how-to-api)
+- [ERA5 request creator](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download#manage-licences)
 
 ## use case
 The use of weather forecasting is essential in certain fields. For example, in aviation, based on forecasts, airplanes may either take off or adopt an alternative flight plan. It is also crucial for predicting the production of raw materials and their impact on prices. In 2023, Google DeepMind released a new open-source weather prediction model named [Graphcast](https://github.com/google-deepmind/graphcast), which outperforms the European Centre for Medium-Range Weather Forecasts (ECMWF) in providing ten-day forecasts in less than a minute. Additionally, the application of quantum computing in this field is highly beneficial, due to its capacity for handling big data and performing complex computations, such as simulations.
